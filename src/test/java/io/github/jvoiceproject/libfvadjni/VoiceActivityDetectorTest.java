@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package io.github.givimad.libfvadjni;
+package io.github.jvoiceproject.libfvadjni;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

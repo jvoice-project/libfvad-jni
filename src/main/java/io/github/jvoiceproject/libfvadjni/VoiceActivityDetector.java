@@ -17,11 +17,11 @@
  * limitations under the License.
  * #L%
  */
-package io.github.givimad.libfvadjni;
+package io.github.jvoiceproject.libfvadjni;
 
 import java.io.IOException;
 
-import io.github.givimad.libfvadjni.internal.NativeUtils;
+import io.github.jvoiceproject.libfvadjni.internal.NativeUtils;
 
 /**
  * libfvad JNI

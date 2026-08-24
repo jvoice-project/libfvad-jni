@@ -1,7 +1,7 @@
 #!/bin/bash
 set -xe
 
-LIB_SRC=src/main/java/io/github/givimad/libfvadjni
+LIB_SRC=src/main/java/io/github/jvoiceproject/libfvadjni
 
 javac -h src/main/native \
   $LIB_SRC/internal/NativeUtils.java \
