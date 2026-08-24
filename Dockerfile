@@ -2,8 +2,9 @@
 
 # Use Ubuntu 20.04.6 Focal Fossa (GLIBC 2.31)
 FROM maven:3.9.3-eclipse-temurin-17-focal AS native-builder
-# use kitware repo to get upper cmake version; fixes armv7l build
+# Add Kitware repo for newer CMake version
 RUN curl -s https://apt.kitware.com/kitware-archive.sh | bash -s
+# Install CMake
 RUN apt update && apt install -y git build-essential cmake
 
 WORKDIR /app
