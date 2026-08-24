@@ -18,9 +18,9 @@
 
   <developers>
     <developer>
+      <id>GiviMAD</id>
       <name>Miguel Álvarez Díez</name>
       <email>miguelwork92@gmail.com</email>
-      <organization>GiviMAD</organization>
       <organizationUrl>https://github.com/GiviMAD</organizationUrl>
     </developer>
     <developer>

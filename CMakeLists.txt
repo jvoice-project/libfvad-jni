@@ -28,7 +28,7 @@ endif()
 
 # ---- Declare libraries ----
 
-add_library(libfvad-jni SHARED src/main/native/io_github_givimad_libfvadjni_VoiceActivityDetector.cpp)
+add_library(libfvad-jni SHARED src/main/native/io_github_jvoiceproject_libfvadjni_VoiceActivityDetector.cpp)
 
 if(NOT DEFINED LIBFVAD_DIR)
 set(LIBFVAD_DIR "${CMAKE_CURRENT_BINARY_DIR}/libfvad.s")
