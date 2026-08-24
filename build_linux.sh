@@ -22,11 +22,3 @@ TARGET_DIR="src/main/resources/debian-$AARCH"
 cmake -Bbuild -DCMAKE_INSTALL_PREFIX="$TARGET_DIR"
 cmake --build build --config Release -j$(nproc 2>/dev/null || echo 1)
 cmake --install build
-
-find "$TARGET_DIR" -type l \( -name "*.so" -o -name "*.so.*" \) | while read -r link; do
-    target=$(readlink -f "$link")
-    [ -f "$target" ] || continue
-    rm -f "$link"
-    mv "$target" "$link"
-    rmdir "$(dirname "$target")" 2>/dev/null || true
-done

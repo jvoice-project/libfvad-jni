@@ -25,14 +25,3 @@ cmake -Bbuild -DCMAKE_INSTALL_PREFIX="$TARGET_DIR" -DCMAKE_OSX_DEPLOYMENT_TARGET
 cmake --build build --config Release
 cmake --install build
 rm -rf build
-
-find "$TARGET_DIR" -type l \( -name "*.dylib" -o -name "*.so" \) | while read -r link; do
-    target_path=$(readlink "$link")
-    link_dir=$(dirname "$link")
-    target=$(cd "$link_dir" && cd "$(dirname "$target_path")" && echo "$(pwd -P)/$(basename "$target_path")")
-
-    [ -f "$target" ] || continue
-    rm -f "$link"
-    mv "$target" "$link"
-    rmdir "$(dirname "$target")" 2>/dev/null || true
-done
