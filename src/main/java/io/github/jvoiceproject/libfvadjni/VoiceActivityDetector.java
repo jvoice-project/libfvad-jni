@@ -19,9 +19,9 @@
  */
 package io.github.jvoiceproject.libfvadjni;
 
-import java.io.IOException;
-
 import io.github.jvoiceproject.libfvadjni.internal.NativeUtils;
+
+import java.io.IOException;
 
 /**
  * libfvad JNI
