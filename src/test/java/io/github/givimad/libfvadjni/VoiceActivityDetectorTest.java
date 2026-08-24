@@ -1,8 +1,8 @@
 package io.github.givimad.libfvadjni;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -14,16 +14,16 @@ import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class VoiceActivityDetectorTest {
     Path samplePath = Path.of("jfk.wav");
     private VoiceActivityDetector vad;
 
-    @Before
+    @BeforeEach
     public void before() throws IOException {
         var sampleFile = samplePath.toFile();
         if (!sampleFile.exists() || !sampleFile.isFile()) {
@@ -33,14 +33,14 @@ public class VoiceActivityDetectorTest {
         vad = VoiceActivityDetector.newInstance();
     }
 
-    @After
+    @AfterEach
     public void after() throws IOException {
         vad.close();
     }
 
     @Test
     public void testSetMode() throws IOException {
-        assertTrue("vad mode configured", vad.setMode(VoiceActivityDetector.Mode.AGGRESSIVE));
+        assertTrue(vad.setMode(VoiceActivityDetector.Mode.AGGRESSIVE), "vad mode configured");
     }
 
     @Test
@@ -50,7 +50,7 @@ public class VoiceActivityDetectorTest {
         assertNotNull(VoiceActivityDetector.SampleRate.fromValue(32000));
         assertNotNull(VoiceActivityDetector.SampleRate.fromValue(48000));
         assertThrows(IllegalArgumentException.class, () -> VoiceActivityDetector.SampleRate.fromValue(1));
-        assertTrue("sample rate configured", vad.setSampleRate(VoiceActivityDetector.SampleRate.S32000));
+        assertTrue(vad.setSampleRate(VoiceActivityDetector.SampleRate.S32000), "sample rate configured");
     }
 
     @Test
