@@ -1,0 +1,20 @@
+== Declared Project Licenses
+
+This program is made available under the terms of the Apache License,
+Version 2.0 which is available at https://www.apache.org/licenses/LICENSE-2.0.
+
+== Source Code
+
+https://github.com/jvoice-project/libfvad-jni
+
+== Third-party Content
+
+libfvad
+* License: BSD 3-Clause License
+* Project: https://github.com/dpirch/libfvad
+* Source: https://github.com/dpirch/libfvad
+
+NativeUtils
+* License: MIT License
+* Project: https://github.com/adamheinrich/native-utils
+* Source: https://github.com/adamheinrich/native-utils
