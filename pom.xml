@@ -99,7 +99,6 @@
                             <version>1.25.2</version>
                         </googleJavaFormat>
                     </java>
-                    <ratchetFrom>origin/main</ratchetFrom>
                 </configuration>
             </plugin>
             <plugin>
