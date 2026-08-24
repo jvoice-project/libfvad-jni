@@ -117,10 +117,12 @@ If you prefer to build locally for your current platform:
 
 These scripts compile the JNI shared library and copy it directly to the corresponding `src/main/resources` folder.
 
-Finally, run the Maven verification to compile the Java project and execute the tests:
+### Java Build
+
+Finally, you can build the Java library, run the tests, and package the JAR with Maven:
 
 ```shell
-mvn verify
+mvn package
 ```
 
 ### Extending the Native API
