@@ -179,6 +179,7 @@ jobs:
           name: libfvad-jni-resources
           path: dist/
       - name: Extract resources tarball
+        shell: bash
         run: |
           mkdir -p src/main/resources
           tar -xvf dist/resources.tar -C ./src/main/resources/
@@ -215,6 +216,7 @@ jobs:
           name: libfvad-jni-resources
           path: dist/
       - name: Extract resources tarball
+        shell: bash
         run: |
           mkdir -p src/main/resources
           tar -xvf dist/resources.tar -C ./src/main/resources/
