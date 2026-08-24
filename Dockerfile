@@ -1,5 +1,6 @@
 # syntax=docker/dockerfile:1
 
+# Use Ubuntu 20.04.6 Focal Fossa (GLIBC 2.31)
 FROM maven:3.9.3-eclipse-temurin-17-focal AS native-builder
 # use kitware repo to get upper cmake version; fixes armv7l build
 RUN curl -s https://apt.kitware.com/kitware-archive.sh | bash -s
