@@ -233,7 +233,7 @@ jobs:
       - name: Deploy with Maven
         id: deploy
         run: |
-          ./mvnw -B clean deploy -DskipTests -Psign
+          ./mvnw -B clean deploy -DskipTests -Pci-cd
           VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
           LIBFVAD_VERSION=$(echo "${VERSION%%"-"*}")
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
