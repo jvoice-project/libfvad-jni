@@ -122,7 +122,7 @@ These scripts compile the JNI shared library and copy it directly to the corresp
 Finally, you can build the Java library, run the tests, and package the JAR with Maven:
 
 ```shell
-mvn package
+./mvnw package
 ```
 
 ### Extending the Native API
@@ -132,4 +132,4 @@ If you want to add or modify native wrapper functions:
 1. Add the native method definition in [`VoiceActivityDetector.java`](src/main/java/io/github/jvoiceproject/libfvadjni/VoiceActivityDetector.java).
 2. Run the `gen_header.sh` script to regenerate the C++ JNI header [`io_github_jvoiceproject_libfvadjni_VoiceActivityDetector.h`](src/main/native/io_github_jvoiceproject_libfvadjni_VoiceActivityDetector.h).
 3. Implement the native method in [`io_github_jvoiceproject_libfvadjni_VoiceActivityDetector.cpp`](src/main/native/io_github_jvoiceproject_libfvadjni_VoiceActivityDetector.cpp).
-4. Run code formatting checking (`mvn spotless:check`) before submitting changes.
+4. Run code formatting checking (`./mvnw spotless:check`) before submitting changes.
