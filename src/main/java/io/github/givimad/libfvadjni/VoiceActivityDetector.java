@@ -38,6 +38,7 @@ public class VoiceActivityDetector implements AutoCloseable {
     private boolean closed;
 
     // region native api
+
     private static native int fvadNew();
 
     private native void fvadReset(int inst);
@@ -57,11 +58,11 @@ public class VoiceActivityDetector implements AutoCloseable {
     }
 
     /**
-     * Sets the vad mode
+     * Sets the VAD mode.
      *
-     * @param mode the desired vad mode
-     * @return true when successful
-     * @throws IOException instance is closed
+     * @param mode the desired VAD mode
+     * @return whether the operation was successful
+     * @throws IOException when the instance is closed
      */
     public boolean setMode(Mode mode) throws IOException {
         assertOpen();
@@ -69,11 +70,11 @@ public class VoiceActivityDetector implements AutoCloseable {
     }
 
     /**
-     * Sets the detector sample rate.
+     * Sets the VAD sampling rate.
      *
      * @param sampleRate desired audio sample rate
-     * @return true when successful
-     * @throws IOException instance is closed
+     * @return whether the operation was successful
+     * @throws IOException when the instance is closed
      */
     public boolean setSampleRate(SampleRate sampleRate) throws IOException {
         assertOpen();
@@ -81,26 +82,28 @@ public class VoiceActivityDetector implements AutoCloseable {
     }
 
     /**
-     * Process audio frame. Only allow audio frames of 10, 20 or 30 ms. You should calculate the
-     * frame length to use. Formula sampleRate/1000*ms.
+     * Process an audio frame.
      *
-     * @param frame audio samples
-     * @return true if voice is detected
-     * @throws IOException instance is closed
-     * @throws IllegalArgumentException incorrect frame length
+     * <p>Only audio frames with a length of 10, 20, or 30 ms are supported. Calculate the frame
+     * length to use based on the {@code sampleRate/1000 * ms} formula.
+     *
+     * @param frame audio samples of the audio frame
+     * @return whether voice activity was detected
+     * @throws IOException when the instance is closed
+     * @throws IllegalArgumentException when the frame length is incorrect
      */
     public boolean process(short[] frame) throws IOException, IllegalArgumentException {
         return process(frame, frame.length);
     }
 
     /**
-     * Process audio frame.
+     * Process an audio frame.
      *
-     * @param frame audio samples
-     * @param length audio samples length
-     * @return true if voice is detected
-     * @throws IOException instance is closed
-     * @throws IllegalArgumentException length parameter is incorrect
+     * @param frame audio samples of the audio frame
+     * @param length audio frame length (number of samples)
+     * @return whether voice activity was detected
+     * @throws IOException when the instance is closed
+     * @throws IllegalArgumentException when the frame length is incorrect
      */
     public boolean process(short[] frame, int length) throws IOException, IllegalArgumentException {
         assertOpen();
@@ -112,9 +115,9 @@ public class VoiceActivityDetector implements AutoCloseable {
     }
 
     /**
-     * Resets the vad state.
+     * Resets the VAD state.
      *
-     * @throws IOException is detector is closed
+     * @throws IOException when the instance is closed
      */
     public void reset() throws IOException {
         assertOpen();
@@ -131,13 +134,13 @@ public class VoiceActivityDetector implements AutoCloseable {
 
     /** Available sample rates. */
     public enum SampleRate {
-        /** 8000 samples per seconds */
+        /** 8 kHz = 8000 samples/seconds */
         S8000(8000),
-        /** 8000 samples per seconds */
+        /** 16 kHz = 16000 samples/seconds */
         S16000(16000),
-        /** 8000 samples per seconds */
+        /** 32 kHz = 32000 samples/seconds */
         S32000(32000),
-        /** 8000 samples per seconds */
+        /** 48 kHz = 48000 samples/seconds */
         S48000(48000);
 
         SampleRate(final int value) {
@@ -147,20 +150,22 @@ public class VoiceActivityDetector implements AutoCloseable {
         private final int value;
 
         /**
-         * Get value.
+         * Get the sample rate as samples/second.
          *
-         * @return sample rate int value.
+         * @return samples/second
          */
         public int toValue() {
             return value;
         }
 
         /**
-         * Initialize from number. Only 8000, 16000, 32000, 48000 are allowed.
+         * Initialize from samples/second.
          *
-         * @param value desired sample rate.
-         * @return sample rate enum instance.
-         * @throws IllegalArgumentException unsupported value.
+         * <p>Only 8000, 16000, 32000, 48000 are allowed.
+         *
+         * @param value desired samples per second
+         * @return sample rate enum instance
+         * @throws IllegalArgumentException when the requested sample rate is not supported
          */
         public static SampleRate fromValue(int value) throws IllegalArgumentException {
             return switch (value) {
@@ -173,8 +178,9 @@ public class VoiceActivityDetector implements AutoCloseable {
         }
     }
 
-    /** Available vad modes. */
+    /** Available VAD modes. */
     public enum Mode {
+        // Enum order must not be changed as the enum ordinal is used in native code.
         /** Least aggressive about filtering out non-speech */
         QUALITY,
         /** Least aggressive about filtering out non-speech */
@@ -197,7 +203,7 @@ public class VoiceActivityDetector implements AutoCloseable {
     }
 
     /**
-     * Register the native library, should be called at first.
+     * Load the native library. Must be called before VAD instances can be created.
      *
      * @throws IOException when unable to load the native library
      */
