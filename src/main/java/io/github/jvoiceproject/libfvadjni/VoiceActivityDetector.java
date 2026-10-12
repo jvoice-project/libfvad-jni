@@ -19,6 +19,7 @@
  */
 package io.github.jvoiceproject.libfvadjni;
 
+import io.github.jvoiceproject.libfvadjni.internal.FvadBinding;
 import io.github.jvoiceproject.libfvadjni.internal.NativeUtils;
 
 import java.io.IOException;
@@ -38,22 +39,6 @@ public class VoiceActivityDetector implements AutoCloseable {
     private final long nativeHandle;
     private boolean closed;
 
-    // region native api
-
-    private static native long fvadNew();
-
-    private native void fvadReset(long handle);
-
-    private native int fvadSetMode(long handle, int mode);
-
-    private native int fvadSetSampleRate(long handle, int sample_rate);
-
-    private native int fvadProcess(long handle, short[] frame, int length);
-
-    private native void fvadFree(long handle);
-
-    // endregion
-
     private VoiceActivityDetector(long nativeHandle) {
         this.nativeHandle = nativeHandle;
     }
@@ -67,7 +52,7 @@ public class VoiceActivityDetector implements AutoCloseable {
      */
     public boolean setMode(Mode mode) throws IOException {
         assertOpen();
-        return fvadSetMode(nativeHandle, mode.ordinal()) == 0;
+        return FvadBinding.fvadSetMode(nativeHandle, mode.ordinal()) == 0;
     }
 
     /**
@@ -79,7 +64,7 @@ public class VoiceActivityDetector implements AutoCloseable {
      */
     public boolean setSampleRate(SampleRate sampleRate) throws IOException {
         assertOpen();
-        return fvadSetSampleRate(nativeHandle, sampleRate.toValue()) == 0;
+        return FvadBinding.fvadSetSampleRate(nativeHandle, sampleRate.toValue()) == 0;
     }
 
     /**
@@ -110,7 +95,7 @@ public class VoiceActivityDetector implements AutoCloseable {
         assertOpen();
         Objects.requireNonNull(frame, "frame is null");
 
-        var result = fvadProcess(nativeHandle, frame, length);
+        var result = FvadBinding.fvadProcess(nativeHandle, frame, length);
         if (result == -1) {
             throw new IllegalArgumentException("Invalid frame length");
         }
@@ -124,14 +109,14 @@ public class VoiceActivityDetector implements AutoCloseable {
      */
     public void reset() throws IOException {
         assertOpen();
-        fvadReset(nativeHandle);
+        FvadBinding.fvadReset(nativeHandle);
     }
 
     @Override
     public void close() {
         if (!closed) {
             closed = true;
-            fvadFree(nativeHandle);
+            FvadBinding.fvadFree(nativeHandle);
         }
     }
 
@@ -202,7 +187,7 @@ public class VoiceActivityDetector implements AutoCloseable {
      */
     public static VoiceActivityDetector newInstance() throws IOException {
         assertRegistered();
-        long handle = fvadNew();
+        long handle = FvadBinding.fvadNew();
         if (handle == 0) {
             throw new IOException("Failed to create VAD instance.");
         }

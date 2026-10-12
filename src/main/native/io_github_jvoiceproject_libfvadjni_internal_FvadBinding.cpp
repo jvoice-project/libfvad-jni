@@ -1,6 +1,6 @@
 #include <cstdint>
 #include "fvad.h"
-#include "io_github_jvoiceproject_libfvadjni_VoiceActivityDetector.h"
+#include "io_github_jvoiceproject_libfvadjni_internal_FvadBinding.h"
 
 static Fvad *getVad(JNIEnv *env, jlong handle)
 {
@@ -15,7 +15,7 @@ static Fvad *getVad(JNIEnv *env, jlong handle)
   return reinterpret_cast<Fvad *>(static_cast<uintptr_t>(handle));
 }
 
-JNIEXPORT jlong JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadNew(
+JNIEXPORT jlong JNICALL Java_io_github_jvoiceproject_libfvadjni_internal_FvadBinding_fvadNew(
     JNIEnv *env, jclass /* thisClass */)
 {
   Fvad *vad = fvad_new();
@@ -29,7 +29,7 @@ JNIEXPORT jlong JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDet
   return static_cast<jlong>(reinterpret_cast<uintptr_t>(vad));
 }
 
-JNIEXPORT void JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadReset(
+JNIEXPORT void JNICALL Java_io_github_jvoiceproject_libfvadjni_internal_FvadBinding_fvadReset(
     JNIEnv *env, jobject /* thisObject */, jlong handle)
 {
   Fvad *vad = getVad(env, handle);
@@ -39,7 +39,7 @@ JNIEXPORT void JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDete
   fvad_reset(vad);
 }
 
-JNIEXPORT jint JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadSetMode(
+JNIEXPORT jint JNICALL Java_io_github_jvoiceproject_libfvadjni_internal_FvadBinding_fvadSetMode(
     JNIEnv *env, jobject /* thisObject */, jlong handle, jint mode)
 {
   Fvad *vad = getVad(env, handle);
@@ -49,7 +49,7 @@ JNIEXPORT jint JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDete
   return fvad_set_mode(vad, mode);
 }
 
-JNIEXPORT jint JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadSetSampleRate(
+JNIEXPORT jint JNICALL Java_io_github_jvoiceproject_libfvadjni_internal_FvadBinding_fvadSetSampleRate(
     JNIEnv *env, jobject /* thisObject */, jlong handle, jint sampleRate)
 {
   Fvad *vad = getVad(env, handle);
@@ -59,7 +59,7 @@ JNIEXPORT jint JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDete
   return fvad_set_sample_rate(vad, sampleRate);
 }
 
-JNIEXPORT jint JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadProcess(
+JNIEXPORT jint JNICALL Java_io_github_jvoiceproject_libfvadjni_internal_FvadBinding_fvadProcess(
     JNIEnv *env, jobject /* thisObject */, jlong handle, jshortArray frame, jint length)
 {
   Fvad *vad = getVad(env, handle);
@@ -102,7 +102,7 @@ JNIEXPORT jint JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDete
   return result;
 }
 
-JNIEXPORT void JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadFree(
+JNIEXPORT void JNICALL Java_io_github_jvoiceproject_libfvadjni_internal_FvadBinding_fvadFree(
     JNIEnv *env, jobject /* thisObject */, jlong handle)
 {
   Fvad *vad = getVad(env, handle);
