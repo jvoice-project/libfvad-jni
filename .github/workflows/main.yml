@@ -260,9 +260,9 @@ jobs:
           generate_release_notes: true
           body: >-
             A JNI wrapper for [libfvad](https://github.com/dpirch/libfvad) v${{ steps.deploy.outputs.LIBFVAD_VERSION }} 
-            [${{ steps.deploy.outputs.COMMIT_HASH }}](https://github.com/dpirch/libfvad/tree/${{ steps.deploy.outputs.LIBFVAD_COMMIT }}), 
+            [${{ steps.deploy.outputs.LIBFVAD_COMMIT }}](https://github.com/dpirch/libfvad/tree/${{ steps.deploy.outputs.LIBFVAD_COMMIT }}), 
             revision ${{ steps.deploy.outputs.LIBFVAD_JNI_INCREMENT }}.
           files: |
-            target/libfvad-jni-${{ steps.deploy.outputs.VERSION }}.jar
+            target/libfvad-jni-${{ steps.deploy.outputs.LIBFVAD_JNI_VERSION }}.jar
         env:
           GITHUB_TOKEN: ${{ github.token }}
