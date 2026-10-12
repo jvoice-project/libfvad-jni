@@ -22,6 +22,7 @@ package io.github.jvoiceproject.libfvadjni;
 import io.github.jvoiceproject.libfvadjni.internal.NativeUtils;
 
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * libfvad JNI
@@ -107,6 +108,8 @@ public class VoiceActivityDetector implements AutoCloseable {
      */
     public boolean process(short[] frame, int length) throws IOException, IllegalArgumentException {
         assertOpen();
+        Objects.requireNonNull(frame, "frame is null");
+
         var result = fvadProcess(nativeHandle, frame, length);
         if (result == -1) {
             throw new IllegalArgumentException("Invalid frame length");
