@@ -26,7 +26,9 @@ package io.github.jvoiceproject.libfvadjni.internal;
  *     href="https://github.com/dpirch/libfvad/blob/997e9dc85bcf5a8be27b0b5b422c7c260c667a41/include/fvad.h">fvad.h</a>
  * @author Florian Hotze - Initial contribution
  */
-public class FvadBinding {
+public final class FvadBinding {
+    private FvadBinding() {}
+
     /**
      * Creates and initializes a new VAD instance.
      *
