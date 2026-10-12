@@ -152,6 +152,154 @@ public class VoiceActivityDetectorTest {
         }
     }
 
+    @Test
+    public void testConcurrentLoadLibrary() throws Exception {
+        int threads = 16;
+        ExecutorService executor = Executors.newFixedThreadPool(threads);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        List<Future<?>> futures = new ArrayList<>();
+
+        try {
+            for (int t = 0; t < threads; t++) {
+                futures.add(
+                        executor.submit(
+                                () -> {
+                                    startLatch.await();
+                                    VoiceActivityDetector.loadLibrary();
+                                    return null;
+                                }));
+            }
+            startLatch.countDown();
+            for (Future<?> future : futures) {
+                future.get(10, TimeUnit.SECONDS);
+            }
+        } finally {
+            executor.shutdown();
+            assertTrue(
+                    executor.awaitTermination(5, TimeUnit.SECONDS),
+                    "Executor should terminate cleanly");
+        }
+    }
+
+    @Test
+    public void testConcurrentClose() throws Exception {
+        VoiceActivityDetector detector = VoiceActivityDetector.newInstance();
+        int threads = 16;
+        ExecutorService executor = Executors.newFixedThreadPool(threads);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        List<Future<?>> futures = new ArrayList<>();
+
+        try {
+            for (int t = 0; t < threads; t++) {
+                futures.add(
+                        executor.submit(
+                                () -> {
+                                    startLatch.await();
+                                    detector.close();
+                                    return null;
+                                }));
+            }
+            startLatch.countDown();
+            for (Future<?> future : futures) {
+                future.get(10, TimeUnit.SECONDS);
+            }
+            assertThrows(IOException.class, () -> detector.reset());
+        } finally {
+            executor.shutdown();
+            assertTrue(
+                    executor.awaitTermination(5, TimeUnit.SECONDS),
+                    "Executor should terminate cleanly");
+        }
+    }
+
+    @Test
+    public void testConcurrentProcessOnSameInstance() throws Exception {
+        try (VoiceActivityDetector detector = VoiceActivityDetector.newInstance()) {
+            assertTrue(detector.setMode(VoiceActivityDetector.Mode.QUALITY));
+            assertTrue(detector.setSampleRate(VoiceActivityDetector.SampleRate.S16000));
+            short[] frame = Arrays.copyOfRange(readJFKFileSamples(), 0, 160);
+
+            int threads = 8;
+            int iterations = 100;
+            ExecutorService executor = Executors.newFixedThreadPool(threads);
+            CountDownLatch startLatch = new CountDownLatch(1);
+            List<Future<?>> futures = new ArrayList<>();
+
+            try {
+                for (int t = 0; t < threads; t++) {
+                    futures.add(
+                            executor.submit(
+                                    () -> {
+                                        startLatch.await();
+                                        for (int i = 0; i < iterations; i++) {
+                                            detector.process(frame);
+                                        }
+                                        return null;
+                                    }));
+                }
+                startLatch.countDown();
+                for (Future<?> future : futures) {
+                    future.get(10, TimeUnit.SECONDS);
+                }
+            } finally {
+                executor.shutdown();
+                assertTrue(
+                        executor.awaitTermination(5, TimeUnit.SECONDS),
+                        "Executor should terminate cleanly");
+            }
+        }
+    }
+
+    @Test
+    public void testConcurrentProcessAndClose() throws Exception {
+        VoiceActivityDetector detector = VoiceActivityDetector.newInstance();
+        detector.setMode(VoiceActivityDetector.Mode.QUALITY);
+        detector.setSampleRate(VoiceActivityDetector.SampleRate.S16000);
+        short[] frame = Arrays.copyOfRange(readJFKFileSamples(), 0, 160);
+
+        int workerThreads = 8;
+        ExecutorService executor = Executors.newFixedThreadPool(workerThreads + 1);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        List<Future<?>> futures = new ArrayList<>();
+
+        try {
+            for (int t = 0; t < workerThreads; t++) {
+                futures.add(
+                        executor.submit(
+                                () -> {
+                                    startLatch.await();
+                                    try {
+                                        for (int i = 0; i < 500; i++) {
+                                            detector.process(frame);
+                                        }
+                                    } catch (IOException expected) {
+                                        // Expected once closed
+                                    }
+                                    return null;
+                                }));
+            }
+            futures.add(
+                    executor.submit(
+                            () -> {
+                                startLatch.await();
+                                Thread.sleep(2);
+                                detector.close();
+                                return null;
+                            }));
+
+            startLatch.countDown();
+            for (Future<?> future : futures) {
+                future.get(10, TimeUnit.SECONDS);
+            }
+            assertThrows(IOException.class, () -> detector.process(frame));
+        } finally {
+            executor.shutdown();
+            assertTrue(
+                    executor.awaitTermination(5, TimeUnit.SECONDS),
+                    "Executor should terminate cleanly");
+        }
+    }
+
     private short[] readJFKFileSamples() throws UnsupportedAudioFileException, IOException {
         // sample is a 16 bit int 16000hz little endian wav file
         AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(samplePath.toFile());

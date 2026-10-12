@@ -24,20 +24,27 @@ import io.github.jvoiceproject.libfvadjni.internal.NativeUtils;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * libfvad JNI
  *
  * <p>libfvad is a voice activity detection engine based on WebRTC's VAD engine.
  *
+ * <p>This class is fully thread-safe. All instance methods and factory/lifecycle operations are
+ * synchronized. Note that for optimal voice detection accuracy, an instance should typically be
+ * dedicated to a single continuous audio stream so that the underlying adaptive noise model remains
+ * consistent.
+ *
  * @author Miguel Álvarez Díez - Initial contribution
+ * @author Florian Hotze - Make thread-safe
  */
 public class VoiceActivityDetector implements AutoCloseable {
 
-    private static boolean libraryLoaded;
+    private static volatile boolean libraryLoaded;
 
     private final long nativeHandle;
-    private boolean closed;
+    private final AtomicBoolean closed = new AtomicBoolean(false);
 
     private VoiceActivityDetector(long nativeHandle) {
         this.nativeHandle = nativeHandle;
@@ -50,7 +57,7 @@ public class VoiceActivityDetector implements AutoCloseable {
      * @return whether the operation was successful
      * @throws IOException when the instance is closed
      */
-    public boolean setMode(Mode mode) throws IOException {
+    public synchronized boolean setMode(Mode mode) throws IOException {
         assertOpen();
         return FvadBinding.fvadSetMode(nativeHandle, mode.ordinal()) == 0;
     }
@@ -62,7 +69,7 @@ public class VoiceActivityDetector implements AutoCloseable {
      * @return whether the operation was successful
      * @throws IOException when the instance is closed
      */
-    public boolean setSampleRate(SampleRate sampleRate) throws IOException {
+    public synchronized boolean setSampleRate(SampleRate sampleRate) throws IOException {
         assertOpen();
         return FvadBinding.fvadSetSampleRate(nativeHandle, sampleRate.toValue()) == 0;
     }
@@ -73,17 +80,24 @@ public class VoiceActivityDetector implements AutoCloseable {
      * <p>Only audio frames with a length of 10, 20, or 30 ms are supported. Calculate the frame
      * length to use based on the {@code sampleRate/1000 * ms} formula.
      *
+     * <p>Note: Callers must not concurrently modify the provided {@code frame} array while
+     * processing is in progress.
+     *
      * @param frame audio samples of the audio frame
      * @return whether voice activity was detected
      * @throws IOException when the instance is closed
      * @throws IllegalArgumentException when the frame length is incorrect
      */
-    public boolean process(short[] frame) throws IOException, IllegalArgumentException {
+    public synchronized boolean process(short[] frame)
+            throws IOException, IllegalArgumentException {
         return process(frame, frame.length);
     }
 
     /**
      * Process an audio frame.
+     *
+     * <p>Note: Callers must not concurrently modify the provided {@code frame} array while
+     * processing is in progress.
      *
      * @param frame audio samples of the audio frame
      * @param length audio frame length (number of samples)
@@ -91,7 +105,8 @@ public class VoiceActivityDetector implements AutoCloseable {
      * @throws IOException when the instance is closed
      * @throws IllegalArgumentException when the frame length is incorrect
      */
-    public boolean process(short[] frame, int length) throws IOException, IllegalArgumentException {
+    public synchronized boolean process(short[] frame, int length)
+            throws IOException, IllegalArgumentException {
         assertOpen();
         Objects.requireNonNull(frame, "frame is null");
 
@@ -107,15 +122,14 @@ public class VoiceActivityDetector implements AutoCloseable {
      *
      * @throws IOException when the instance is closed
      */
-    public void reset() throws IOException {
+    public synchronized void reset() throws IOException {
         assertOpen();
         FvadBinding.fvadReset(nativeHandle);
     }
 
     @Override
-    public void close() {
-        if (!closed) {
-            closed = true;
+    public synchronized void close() {
+        if (closed.compareAndSet(false, true)) {
             FvadBinding.fvadFree(nativeHandle);
         }
     }
@@ -199,7 +213,7 @@ public class VoiceActivityDetector implements AutoCloseable {
      *
      * @throws IOException when unable to load the native library
      */
-    public static void loadLibrary() throws IOException {
+    public static synchronized void loadLibrary() throws IOException {
         if (libraryLoaded) {
             return;
         }
@@ -240,7 +254,7 @@ public class VoiceActivityDetector implements AutoCloseable {
     }
 
     private void assertOpen() throws IOException {
-        if (closed) {
+        if (closed.get()) {
             throw new IOException("VAD is closed.");
         }
     }
