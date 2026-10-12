@@ -238,9 +238,14 @@ jobs:
         run: |
           ./mvnw -B clean deploy -DskipTests -Pci-cd
           VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
-          LIBFVAD_VERSION=$(echo "${VERSION%%"-"*}")
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-          echo "LIBFVAD_VERSION=$LIBFVAD_VERSION" >> $GITHUB_OUTPUT
+
+          # Split version (e.g. 1.0.0-997e9dc-1) by "-"
+          IFS='-' read -r LIBFVAD_VERSION LIBFVAD_COMMIT LIBFVAD_JNI_INCREMENT <<< "$VERSION"
+  
+          echo "LIBFVAD_JNI_VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "LIBFVAD_VERSION=$LIBFVAD_VERSION" >> "$GITHUB_OUTPUT"
+          echo "LIBFVAD_COMMIT=$LIBFVAD_COMMIT" >> "$GITHUB_OUTPUT"
+          echo "LIBFVAD_JNI_INCREMENT=$LIBFVAD_JNI_INCREMENT" >> "$GITHUB_OUTPUT"
         env:
           MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_USERNAME }}
           MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_TOKEN }}
@@ -249,11 +254,14 @@ jobs:
         uses: softprops/action-gh-release@v2
         id: create_release
         with:
-          name: libfvad JNI v${{ steps.deploy.outputs.VERSION }}
+          name: libfvad JNI v${{ steps.deploy.outputs.LIBFVAD_JNI_VERSION }}
           draft: false
           prerelease: false
           generate_release_notes: true
-          body: A JNI wrapper for [libfvad](https://github.com/dpirch/libfvad) v${{ steps.deploy.outputs.LIBFVAD_VERSION }}
+          body: >-
+            A JNI wrapper for [libfvad](https://github.com/dpirch/libfvad) v${{ steps.deploy.outputs.LIBFVAD_VERSION }} 
+            [${{ steps.deploy.outputs.COMMIT_HASH }}](https://github.com/dpirch/libfvad/tree/${{ steps.deploy.outputs.LIBFVAD_COMMIT }}), 
+            revision ${{ steps.deploy.outputs.LIBFVAD_JNI_INCREMENT }}.
           files: |
             target/libfvad-jni-${{ steps.deploy.outputs.VERSION }}.jar
         env:
