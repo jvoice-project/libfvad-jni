@@ -10,50 +10,50 @@ extern "C" {
 /*
  * Class:     io_github_jvoiceproject_libfvadjni_VoiceActivityDetector
  * Method:    fvadNew
- * Signature: ()I
+ * Signature: ()J
  */
-JNIEXPORT jint JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadNew
+JNIEXPORT jlong JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadNew
   (JNIEnv *, jclass);
 
 /*
  * Class:     io_github_jvoiceproject_libfvadjni_VoiceActivityDetector
  * Method:    fvadReset
- * Signature: (I)V
+ * Signature: (J)V
  */
 JNIEXPORT void JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadReset
-  (JNIEnv *, jobject, jint);
+  (JNIEnv *, jobject, jlong);
 
 /*
  * Class:     io_github_jvoiceproject_libfvadjni_VoiceActivityDetector
  * Method:    fvadSetMode
- * Signature: (II)I
+ * Signature: (JI)I
  */
 JNIEXPORT jint JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadSetMode
-  (JNIEnv *, jobject, jint, jint);
+  (JNIEnv *, jobject, jlong, jint);
 
 /*
  * Class:     io_github_jvoiceproject_libfvadjni_VoiceActivityDetector
  * Method:    fvadSetSampleRate
- * Signature: (II)I
+ * Signature: (JI)I
  */
 JNIEXPORT jint JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadSetSampleRate
-  (JNIEnv *, jobject, jint, jint);
+  (JNIEnv *, jobject, jlong, jint);
 
 /*
  * Class:     io_github_jvoiceproject_libfvadjni_VoiceActivityDetector
  * Method:    fvadProcess
- * Signature: (I[SI)I
+ * Signature: (J[SI)I
  */
 JNIEXPORT jint JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadProcess
-  (JNIEnv *, jobject, jint, jshortArray, jint);
+  (JNIEnv *, jobject, jlong, jshortArray, jint);
 
 /*
  * Class:     io_github_jvoiceproject_libfvadjni_VoiceActivityDetector
  * Method:    fvadFree
- * Signature: (I)V
+ * Signature: (J)V
  */
 JNIEXPORT void JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadFree
-  (JNIEnv *, jobject, jint);
+  (JNIEnv *, jobject, jlong);
 
 #ifdef __cplusplus
 }

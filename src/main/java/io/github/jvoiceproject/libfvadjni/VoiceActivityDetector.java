@@ -34,27 +34,27 @@ public class VoiceActivityDetector implements AutoCloseable {
 
     private static boolean libraryLoaded;
 
-    private final int pointerRef;
+    private final long nativeHandle;
     private boolean closed;
 
     // region native api
 
-    private static native int fvadNew();
+    private static native long fvadNew();
 
-    private native void fvadReset(int inst);
+    private native void fvadReset(long handle);
 
-    private native int fvadSetMode(int inst, int mode);
+    private native int fvadSetMode(long handle, int mode);
 
-    private native int fvadSetSampleRate(int inst, int sample_rate);
+    private native int fvadSetSampleRate(long handle, int sample_rate);
 
-    private native int fvadProcess(int inst, short[] frame, int length);
+    private native int fvadProcess(long handle, short[] frame, int length);
 
-    private native void fvadFree(int inst);
+    private native void fvadFree(long handle);
 
     // endregion
 
-    private VoiceActivityDetector(int pointerRef) {
-        this.pointerRef = pointerRef;
+    private VoiceActivityDetector(long nativeHandle) {
+        this.nativeHandle = nativeHandle;
     }
 
     /**
@@ -66,7 +66,7 @@ public class VoiceActivityDetector implements AutoCloseable {
      */
     public boolean setMode(Mode mode) throws IOException {
         assertOpen();
-        return fvadSetMode(pointerRef, mode.ordinal()) == 0;
+        return fvadSetMode(nativeHandle, mode.ordinal()) == 0;
     }
 
     /**
@@ -78,7 +78,7 @@ public class VoiceActivityDetector implements AutoCloseable {
      */
     public boolean setSampleRate(SampleRate sampleRate) throws IOException {
         assertOpen();
-        return fvadSetSampleRate(pointerRef, sampleRate.toValue()) == 0;
+        return fvadSetSampleRate(nativeHandle, sampleRate.toValue()) == 0;
     }
 
     /**
@@ -107,7 +107,7 @@ public class VoiceActivityDetector implements AutoCloseable {
      */
     public boolean process(short[] frame, int length) throws IOException, IllegalArgumentException {
         assertOpen();
-        var result = fvadProcess(pointerRef, frame, length);
+        var result = fvadProcess(nativeHandle, frame, length);
         if (result == -1) {
             throw new IllegalArgumentException("Invalid frame length");
         }
@@ -121,14 +121,14 @@ public class VoiceActivityDetector implements AutoCloseable {
      */
     public void reset() throws IOException {
         assertOpen();
-        fvadReset(pointerRef);
+        fvadReset(nativeHandle);
     }
 
     @Override
     public void close() {
         if (!closed) {
             closed = true;
-            fvadFree(pointerRef);
+            fvadFree(nativeHandle);
         }
     }
 
@@ -199,7 +199,11 @@ public class VoiceActivityDetector implements AutoCloseable {
      */
     public static VoiceActivityDetector newInstance() throws IOException {
         assertRegistered();
-        return new VoiceActivityDetector(fvadNew());
+        long handle = fvadNew();
+        if (handle == 0) {
+            throw new IOException("Failed to create VAD instance.");
+        }
+        return new VoiceActivityDetector(handle);
     }
 
     /**
