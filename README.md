@@ -24,7 +24,15 @@ The native binaries for those platforms are included in the distributed JAR.
 
 ## Usage
 
-The package is distributed through [Maven Central](https://central.sonatype.com/artifact/io.github.jvoice-project/libfvad-jni):
+The package is distributed through [Maven Central](https://central.sonatype.com/artifact/io.github.jvoice-project/libfvad-jni).
+
+Version numbers consist of these three parts separated by dashes:
+
+1. libfvad version: The version of the libfvad library that is used.
+1. libfvad commit hash: Since libfvad hasn't released a new version for years, we use the commit hash as additional versioning information.
+1. libfvad-jni version: Incremental version number that is used to indicate the version of the JNI wrapper. 
+
+When libfvad-jni updates to a newer libfvad version, the libfvad-jni version is incremented as well.
 
 ### Maven
 
