@@ -23,7 +23,14 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
@@ -97,6 +104,52 @@ public class VoiceActivityDetectorTest {
             }
         }
         assertEquals(640, detection);
+    }
+
+    @Test
+    public void testConcurrentInstancesAndLifecycle() throws Exception {
+        int threads = 16;
+        int iterationsPerThread = 100;
+        ExecutorService executor = Executors.newFixedThreadPool(threads);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        List<Future<?>> futures = new ArrayList<>();
+        short[] frame = Arrays.copyOfRange(readJFKFileSamples(), 0, 160); // 10ms frame at 16kHz
+
+        try {
+            for (int t = 0; t < threads; t++) {
+                futures.add(
+                        executor.submit(
+                                () -> {
+                                    startLatch.await();
+                                    for (int i = 0; i < iterationsPerThread; i++) {
+                                        VoiceActivityDetector detector =
+                                                VoiceActivityDetector.newInstance();
+                                        try {
+                                            assertTrue(
+                                                    detector.setMode(
+                                                            VoiceActivityDetector.Mode.AGGRESSIVE));
+                                            assertTrue(
+                                                    detector.setSampleRate(
+                                                            VoiceActivityDetector.SampleRate
+                                                                    .S16000));
+                                            detector.process(frame);
+                                        } finally {
+                                            detector.close();
+                                        }
+                                    }
+                                    return null;
+                                }));
+            }
+            startLatch.countDown();
+            for (Future<?> future : futures) {
+                future.get(30, TimeUnit.SECONDS);
+            }
+        } finally {
+            executor.shutdown();
+            assertTrue(
+                    executor.awaitTermination(5, TimeUnit.SECONDS),
+                    "Executor should terminate cleanly");
+        }
     }
 
     private short[] readJFKFileSamples() throws UnsupportedAudioFileException, IOException {

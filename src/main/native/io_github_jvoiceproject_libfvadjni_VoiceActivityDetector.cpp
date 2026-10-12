@@ -1,38 +1,81 @@
-#include <iostream>
-#include "io_github_jvoiceproject_libfvadjni_VoiceActivityDetector.h"
-#include <map>
+#include <cstdint>
 #include "fvad.h"
+#include "io_github_jvoiceproject_libfvadjni_VoiceActivityDetector.h"
 
-std::map<int, Fvad *> instMap;
-
-JNIEXPORT jint JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadNew(JNIEnv *env, jclass thisClass)
+static Fvad *getVad(JNIEnv *env, jlong handle)
 {
-  int ref = rand();
-  instMap.insert({ref, fvad_new()});
-  return ref;
+  if (handle == 0) {
+    jclass ise = env->FindClass("java/lang/IllegalStateException");
+    if (ise) {
+      env->ThrowNew(ise, "Invalid or closed VAD handle");
+      env->DeleteLocalRef(ise);
+    }
+    return nullptr;
+  }
+  return reinterpret_cast<Fvad *>(static_cast<uintptr_t>(handle));
 }
 
-JNIEXPORT void JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadReset(JNIEnv *env, jobject thisObject, jint instRef)
+JNIEXPORT jlong JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadNew(
+    JNIEnv *env, jclass /* thisClass */)
 {
-  fvad_reset(instMap.at(instRef));
+  Fvad *vad = fvad_new();
+  if (!vad) {
+    jclass oomClass = env->FindClass("java/lang/OutOfMemoryError");
+    if (oomClass) {
+      env->ThrowNew(oomClass, "Failed to allocate Fvad instance");
+    }
+    return 0;
+  }
+  return static_cast<jlong>(reinterpret_cast<uintptr_t>(vad));
 }
 
-JNIEXPORT jint JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadSetMode(JNIEnv *env, jobject thisObject, jint instRef, jint mode)
+JNIEXPORT void JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadReset(
+    JNIEnv *env, jobject /* thisObject */, jlong handle)
 {
-  return fvad_set_mode(instMap.at(instRef), mode);
+  Fvad *vad = getVad(env, handle);
+  if (!vad) {
+    return;
+  }
+  fvad_reset(vad);
 }
 
-JNIEXPORT jint JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadSetSampleRate(JNIEnv *env, jobject thisObject, jint instRef, jint sampleRate)
+JNIEXPORT jint JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadSetMode(
+    JNIEnv *env, jobject /* thisObject */, jlong handle, jint mode)
 {
-  return fvad_set_sample_rate(instMap.at(instRef), sampleRate);
+  Fvad *vad = getVad(env, handle);
+  if (!vad) {
+    return -1;
+  }
+  return fvad_set_mode(vad, mode);
 }
-JNIEXPORT jint JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadProcess(JNIEnv *env, jobject thisObject, jint instRef, jshortArray frame, jint length)
+
+JNIEXPORT jint JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadSetSampleRate(
+    JNIEnv *env, jobject /* thisObject */, jlong handle, jint sampleRate)
 {
+  Fvad *vad = getVad(env, handle);
+  if (!vad) {
+    return -1;
+  }
+  return fvad_set_sample_rate(vad, sampleRate);
+}
+
+JNIEXPORT jint JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadProcess(
+    JNIEnv *env, jobject /* thisObject */, jlong handle, jshortArray frame, jint length)
+{
+  Fvad *vad = getVad(env, handle);
+  if (!vad) {
+    return -1;
+  }
+
   const int16_t *framePointer = env->GetShortArrayElements(frame, NULL);
-  return fvad_process(instMap.at(instRef), framePointer, length);
+  return fvad_process(vad, framePointer, length);
 }
-JNIEXPORT void JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadFree(JNIEnv *env, jobject thisObject, jint instRef)
+
+JNIEXPORT void JNICALL Java_io_github_jvoiceproject_libfvadjni_VoiceActivityDetector_fvadFree(
+    JNIEnv *env, jobject /* thisObject */, jlong handle)
 {
-  fvad_free(instMap.at(instRef));
-  instMap.erase(instRef);
+  Fvad *vad = getVad(env, handle);
+  if (vad) {
+    fvad_free(vad);
+  }
 }
