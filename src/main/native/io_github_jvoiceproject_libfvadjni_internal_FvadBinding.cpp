@@ -23,6 +23,7 @@ JNIEXPORT jlong JNICALL Java_io_github_jvoiceproject_libfvadjni_internal_FvadBin
     jclass oomClass = env->FindClass("java/lang/OutOfMemoryError");
     if (oomClass) {
       env->ThrowNew(oomClass, "Failed to allocate Fvad instance");
+      env->DeleteLocalRef(oomClass);
     }
     return 0;
   }
