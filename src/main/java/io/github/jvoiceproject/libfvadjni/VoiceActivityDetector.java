@@ -31,10 +31,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * <p>libfvad is a voice activity detection engine based on WebRTC's VAD engine.
  *
- * <p>This class is fully thread-safe. All instance methods and factory/lifecycle operations are
- * synchronized. Note that for optimal voice detection accuracy, an instance should typically be
- * dedicated to a single continuous audio stream so that the underlying adaptive noise model remains
- * consistent.
+ * <p>This class is fully thread-safe. All methods are safe to be called concurrently. Note that for
+ * optimal voice detection accuracy, an instance should typically be dedicated to a single
+ * continuous audio stream so that the underlying adaptive noise model remains consistent.
  *
  * @author Miguel Álvarez Díez - Initial contribution
  * @author Florian Hotze - Make thread-safe
